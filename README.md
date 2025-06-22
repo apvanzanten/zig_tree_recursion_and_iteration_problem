@@ -1,6 +1,25 @@
 # zig_tree_recursion_and_iteration_problem
 A minimal example for an issue i'm having with zig 0.14.1.
 
+**UPDATE: The problem is due to the use of capture-by-value in the switch statement in the getChildren function. See diff below for fix.**
+```diff
+diff --git a/problem.zig b/problem.zig
+index 5214c1b..8be8688 100644
+--- a/problem.zig
++++ b/problem.zig
+@@ -32,7 +32,7 @@ const Node = union(enum) {
+ 
+     fn getChildren(self: *const Self) []const usize {
+         switch (self.*) {
+-            .parent => |p| return p.children.slice(),
++            .parent => |*p| return p.children.slice(),
+             else => return &.{}, // empty slice
+         }
+     }
+```
+
+---
+
 Issue is demonstrated in problem.zig, which can be executed by way of `zig run problem.zig`.
 
 The example consists of a simple tree data structure, in which nodes are placed in an array, and parent nodes contain indices of their children in a BoundedArray, along with some functions to recursively print the nodes in their tree form.
